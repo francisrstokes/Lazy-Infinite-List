@@ -1,0 +1,11 @@
+{
+  "name": "lazy-infinite",
+  "version": "0.0.1",
+  "description": "A Fantasy Land Compliant, Lazily Evaluated Infinite List Data Structure",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Francis Stokes",
+  "license": "ISC"
+}
