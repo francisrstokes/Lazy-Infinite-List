@@ -19,7 +19,7 @@ Infinite.prototype.zip = function (inf) {
   if (!(inf instanceof Infinite)) {
     throw new Error(`Argument to zip must be another Infinite`);
   }
-  return this._transform('zip', inf.take.bind(inf));
+  return this._transform('zip', inf.gen);
 };
 
 Infinite.prototype['fantasy-land/map'] = Infinite.prototype.map = function (fn) {
@@ -48,7 +48,7 @@ const interpret = (iterator, n, transformations) => {
   let out = new Array(n);
   let i = 0;
 
-  const takenZips = transformations.map(t => (t.type === 'zip') ? t.fn(n) : undefined);
+  const zips = transformations.map(t => (t.type === 'zip') ? t.fn() : undefined);
 
   while (i < n) {
     const {value, done} = iterator.next(last);
@@ -68,7 +68,7 @@ const interpret = (iterator, n, transformations) => {
         skip = true;
         break;
       } else if (transformations[ti].type === 'zip') {
-        x = [x, takenZips[ti][i]];
+        x = [x, zips[ti].next().value];
       }
     }
 
