@@ -23,7 +23,9 @@ Infinite.prototype.zip = function (inf) {
   if (!(inf instanceof Infinite)) {
     throw new Error(`Argument to zip must be another Infinite`);
   }
-  return this._transform('zip', inf.gen);
+  const newInfinite = this._copy();
+  newInfinite.transformations.push({ type: 'zip', other: inf });
+  return newInfinite;
 };
 
 // map :: Infinite a ~> (a -> b) -> Infinite b
@@ -60,7 +62,11 @@ const interpret = (iterator, n, transformations) => {
   let out = new Array(n);
   let i = 0;
 
-  const zips = transformations.map(t => (t.type === 'zip') ? t.fn() : undefined);
+  const zips = transformations.map(t =>
+    (t.type === 'zip')
+    ? { iterator: t.other.gen(), transformations: t.other.transformations }
+    : undefined
+  );
 
   while (i < n) {
     const {value, done} = iterator.next(last);
@@ -77,7 +83,8 @@ const interpret = (iterator, n, transformations) => {
       } else if (transformations[ti].type === 'filterDependent' && !transformations[ti].fn(x, out.slice(0, i))) {
         filtered = true;
       } else if (transformations[ti].type === 'zip') {
-        x = [x, zips[ti].next().value];
+        const zv = interpret(zips[ti].iterator, 1, zips[ti].transformations)[0];
+        x = [x, zv];
       }
 
       if (filtered) break;
