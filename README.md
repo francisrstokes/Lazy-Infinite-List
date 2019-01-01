@@ -20,7 +20,7 @@ const naturalNumbers = Infinite.of(function*() {
   while (true) yield x++;
 });
 
-// Transform it to yield new infinite structures
+// Transform to yield new infinite structures
 const primes = naturalNumbers
   .filterDependent((x, list) => {
     if (!(x > 1 && (x % 2 === 1 || x === 2))) return false;
@@ -53,6 +53,16 @@ const odds = Infinite.of(function*() {
     x += 2;
   }
 });
+```
+
+### Infinite.from
+
+`Infinite.from :: (a -> a) -> a -> Infinite a`
+
+`Infinite.from` takes *next value* function and a *start* value, and returns an `Infinite` with an automatically constructed iterator.
+
+```javascript
+const odds = Infinite.from(x => x + 2, 1);
 ```
 
 ### take
@@ -92,6 +102,26 @@ naturalNumbers
 // -> [ -0, -1, -2, -3, -4 ]
 ```
 
+### mapIndexed
+
+`mapIndexed :: Infinite a ~> (a -> Int -> b) -> Infinite b`
+
+`mapIndexed` is just like [map](#map), except the function it is passed receives an index as it's second argument.
+
+**Example**
+```javascript
+primes
+  .mapIndexed((x, i) => `Prime #${i}: ${x}`)
+  .take(5);
+// -> [
+//      'Prime #0: 2',
+//      'Prime #1: 3',
+//      'Prime #2: 5',
+//      'Prime #3: 7',
+//      'Prime #4: 9'
+//    ]
+```
+
 ### filter
 
 `filter :: Infinite a ~> (a -> Bool) -> Infinite a`
@@ -106,11 +136,25 @@ naturalNumbers
 // -> [ 0, 2, 4, 6, 8 ]
 ```
 
+### filterIndexed
+
+`filterIndexed :: Infinite a ~> (a -> Int -> b) -> Infinite b`
+
+`filterIndexed` is just like [filter](#filter), except the function it is passed receives an index as it's second argument.
+
+**Example**
+```javascript
+primes
+  .filterIndexed((x, i) => i % 2 === 0)
+  .take(5)
+// -> [ 2, 5, 9, 13, 19 ]
+```
+
 ### filterDependent
 
 `filterDependent :: Infinite a ~> (a -> [a] -> Bool) -> Infinite a`
 
-`filterDependent` is just like [filter](#filter), except that the function it takes gets the *list of items before it* as the second argument.
+`filterDependent` is just like [filter](#filter), except that the function it is passed receives the *list of items before it* as the second argument.
 
 **Example**
 ```javascript
@@ -124,14 +168,27 @@ naturalNumbers
 
 `zip :: Infinite a ~> Infinite b -> Infinite [a, b]`
 
-`zip` takes another *Infinite*, and returns a new Infinite whose elements are an array with the original value and a corresponding value from the other infinte.
+`zip` takes another `Infinite`, and returns a new Infinite whose elements are an array with the original value and a corresponding value from the other infinte.
+
+This can be used to create custom *indexing*.
 
 **Example**
 ```javascript
-naturalNumbers
-  .zip(primes)
+const fibonacci = Infinite.of(function* () {
+  let a = 0;
+  let b = 1;
+  while (true) {
+    yield b;
+    const tmp = b;
+    b += a;
+    a = tmp;
+  }
+});
+
+primes
+  .zip(fibonacci)
   .take(5);
-// -> [ [0, 2], [1, 3], [2, 5], [3, 7], [4, 11] ]
+// -> [ [2, 1], [3, 1], [5, 2], [7, 3], [9, 5] ]
 ```
 
 ## Fantasy Land

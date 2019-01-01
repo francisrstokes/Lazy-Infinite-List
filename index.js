@@ -4,6 +4,12 @@ function Infinite(gen) {
   this.transformations = [];
 };
 
+// indexingSet :: Infinite Integer
+const indexingSet = new Infinite(function*(){
+  let x = 0;
+  for (;;) yield x++;
+});
+
 // _copy :: Infinite a ~> Infinite a
 Infinite.prototype._copy = function () {
   const newInfinite = Infinite.of(this.gen);
@@ -33,9 +39,22 @@ Infinite.prototype['fantasy-land/map'] = Infinite.prototype.map = function (fn) 
   return this._transform('map', fn);
 };
 
+// mapIndexed :: Infinite a ~> (a -> Integer -> b) -> Infinite b
+Infinite.prototype.mapIndexed = function (fn) {
+  return this.zip(indexingSet)
+    .map(([x, i]) => fn(x, i));
+};
+
 // filter :: Infinite a ~> (a -> Bool) -> Infinite b
 Infinite.prototype['fantasy-land/filter'] = Infinite.prototype.filter = function (fn) {
   return this._transform('filter', fn);
+};
+
+// filterIndexed :: Infinite a ~> (a -> Integer -> Bool) -> Infinite a
+Infinite.prototype.filterIndexed = function (fn) {
+  return this.zip(indexingSet)
+    .filter(([x, i]) => fn(x, i))
+    .map(([x]) => x);
 };
 
 // filterDependent :: Infinite a ~> (a -> [a] -> Bool) -> Infinite b
@@ -101,5 +120,14 @@ const interpret = (iterator, n, transformations) => {
 
 // of :: Generator a -> Infinite a
 Infinite['fantasy-land/of'] = Infinite.of = gen => new Infinite(gen);
+
+// from :: (a -> a) -> a -> Infinite a
+Infinite.from = (fn, start) => Infinite.of(function* () {
+  let x = start;
+  while (true) {
+    yield x;
+    x = fn(x);
+  }
+});
 
 module.exports = Infinite;
