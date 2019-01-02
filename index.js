@@ -9,6 +9,26 @@ const indexingSet = new Infinite(function*(){
   for (;;) yield x++;
 });
 
+// drop :: Infinite a ~> Integer -> Infinite a
+Infinite.prototype.drop = function (n) {
+  if (typeof n !== 'number' || !(n < Infinity)) {
+    throw new Error(`n must be a number less than Infinity`);
+  }
+
+  const that = this;
+  return Infinite.of(function* () {
+    const i = that.gen();
+    let dropped = 0;
+    while (dropped++ < n) i.next();
+
+    while (true) {
+      const v = i.next();
+      if (v.done) break;
+      yield v.value;
+    }
+  });
+};
+
 // zip :: Infinite a ~> Infinite b -> Infinite [a, b]
 Infinite.prototype.zip = function (inf) {
   if (!(inf instanceof Infinite)) {

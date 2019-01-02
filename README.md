@@ -90,6 +90,20 @@ primes.nth(5);
 
 ### map
 
+`drop :: Infinite a ~> Integer -> Infinite a`
+
+`drop` takes a number *n* and returns a new `Infinite` with the first *n* elements removed.
+
+**Example**
+```javascript
+naturalNumbers
+  .drop(5)
+  .take(5);
+// -> [ 5, 6, 7, 8, 9 ]
+```
+
+### map
+
 `map :: Infinite a ~> (a -> b) -> Infinite b`
 
 `map` takes a function and applies it to every element in the list.
