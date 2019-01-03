@@ -82,6 +82,22 @@ Infinite.prototype['fantasy-land/map'] = Infinite.prototype.map = function (fn) 
   });
 };
 
+// flatMap :: Infinite a ~> (a -> [b]) -> Infinite b
+Infinite.prototype.flatMap = function (fn) {
+  const that = this;
+  return Infinite.of(function* () {
+    const i = that.gen();
+    while (true) {
+      const v = i.next();
+      if (v.done) break;
+      const vs = fn(v.value);
+      for (let j = 0; j < vs.length; j++) {
+        yield vs[j];
+      }
+    }
+  });
+};
+
 // mapIndexed :: Infinite a ~> (a -> Integer -> b) -> Infinite b
 Infinite.prototype.mapIndexed = function (fn) {
   return this.zip(indexingSet)

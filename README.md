@@ -45,6 +45,7 @@ const first1000Primes = primes.take(1000);
 
 `take` receives an argument *n*, and returns a concrete list with *n* elements.
 
+**Example**
 ```javascript
 naturalNumbers.take(5);
 // -> [ 0, 1, 2, 3, 4 ]
@@ -88,6 +89,20 @@ naturalNumbers
   .map(x => -x)
   .take(5);
 // -> [ -0, -1, -2, -3, -4 ]
+```
+
+### flatMap
+
+`flatMap :: Infinite a ~> (a -> [b]) -> Infinite b`
+
+`flatMap` runs a function on every element of the list and concatenates the results.
+
+**Example**
+```javascript
+naturalNumbers
+  .flatMap(x => naturalNumbers.take(x))
+  .take(10);
+// -> [ 0, 0, 1, 0, 1, 2, 0, 1, 2, 3 ]
 ```
 
 ### mapIndexed
@@ -210,6 +225,7 @@ primes
 
 `Infinite.of` takes a potentially infinite generator function and returns an `Infinite` list.
 
+**Example**
 ```javascript
 const odds = Infinite.of(function*() {
   let x = 1;
@@ -226,6 +242,7 @@ const odds = Infinite.of(function*() {
 
 `Infinite.from` takes *next value* function and a *start* value, and returns an `Infinite` with an automatically constructed iterator.
 
+**Example**
 ```javascript
 const odds = Infinite.from(x => x + 2, 1);
 ```
@@ -236,6 +253,7 @@ const odds = Infinite.from(x => x + 2, 1);
 
 `Infinite.fromIterable` takes anything conforming to the `Iterable` interface and returns an `Infinite`.
 
+**Example**
 ```javascript
 Infinite.fromIterable([1,2,3,4,5,6,7]).take(5)
 // -> [ 1, 2, 3, 4, 5 ]
