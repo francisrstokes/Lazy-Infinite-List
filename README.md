@@ -39,32 +39,6 @@ const first1000Primes = primes.take(1000);
 
 ## API
 
-### Infinite.of
-
-`Infinite.of :: Generator a -> Infinite a`
-
-`Infinite.of` takes a potentially infinite generator function and returns an `Infinite` list.
-
-```javascript
-const odds = Infinite.of(function*() {
-  let x = 1;
-  while (true) {
-    yield x;
-    x += 2;
-  }
-});
-```
-
-### Infinite.from
-
-`Infinite.from :: (a -> a) -> a -> Infinite a`
-
-`Infinite.from` takes *next value* function and a *start* value, and returns an `Infinite` with an automatically constructed iterator.
-
-```javascript
-const odds = Infinite.from(x => x + 2, 1);
-```
-
 ### take
 
 `take :: Infinite a ~> Integer -> [a]`
@@ -88,7 +62,7 @@ primes.nth(5);
 // -> 4
 ```
 
-### map
+### drop
 
 `drop :: Infinite a ~> Integer -> Infinite a`
 
@@ -203,6 +177,68 @@ primes
   .zip(fibonacci)
   .take(5);
 // -> [ [2, 1], [3, 1], [5, 2], [7, 3], [9, 5] ]
+```
+
+### intersperse
+
+`intersperse :: Infinite a ~> Infinite b -> Infinite a|b`
+
+`intersperse` takes another `Infinite`, and returns a new Infinite whose elements alternate between the first and second Infnites.
+
+**Example**
+```javascript
+const fibonacci = Infinite.of(function* () {
+  let a = 0;
+  let b = 1;
+  while (true) {
+    yield b;
+    const tmp = b;
+    b += a;
+    a = tmp;
+  }
+});
+
+primes
+  .intersperse(fibonacci)
+  .take(5);
+// -> [ 2, 1, 3, 1, 5 ]
+```
+
+### Infinite.of
+
+`Infinite.of :: Generator a -> Infinite a`
+
+`Infinite.of` takes a potentially infinite generator function and returns an `Infinite` list.
+
+```javascript
+const odds = Infinite.of(function*() {
+  let x = 1;
+  while (true) {
+    yield x;
+    x += 2;
+  }
+});
+```
+
+### Infinite.from
+
+`Infinite.from :: (a -> a) -> a -> Infinite a`
+
+`Infinite.from` takes *next value* function and a *start* value, and returns an `Infinite` with an automatically constructed iterator.
+
+```javascript
+const odds = Infinite.from(x => x + 2, 1);
+```
+
+# Infinite.fromIterable
+
+`Infinite.fromIterable :: Iterable a -> Infinite a`
+
+`Infinite.fromIterable` takes anything conforming to the `Iterable` interface and returns an `Infinite`.
+
+```javascript
+Infinite.fromIterable([1,2,3,4,5,6,7]).take(5)
+// -> [ 1, 2, 3, 4, 5 ]
 ```
 
 ## Fantasy Land

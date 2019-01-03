@@ -29,6 +29,27 @@ Infinite.prototype.drop = function (n) {
   });
 };
 
+// intersperse :: Infinite a ~> Infinite b -> Infinite a|b
+Infinite.prototype.intersperse = function (inf) {
+  if (!(inf instanceof Infinite)) {
+    throw new Error(`Argument to intersperse must be another Infinite`);
+  }
+
+  const that = this;
+  return Infinite.of(function* () {
+    const i = that.gen();
+    const i2 = inf.gen();
+    let useFirst = true;
+
+    while (true) {
+      const v = useFirst ? i.next() : i2.next();
+      if (v.done) break;
+      yield v.value;
+      useFirst = !useFirst;
+    }
+  });
+};
+
 // zip :: Infinite a ~> Infinite b -> Infinite [a, b]
 Infinite.prototype.zip = function (inf) {
   if (!(inf instanceof Infinite)) {
@@ -114,7 +135,7 @@ Infinite.prototype.take = function (n) {
   let index = 0;
   while (index < n) {
     const v = i.next();
-    if (v.done) return concrete.slice(0, i);
+    if (v.done) return concrete.slice(0, index);
     concrete[index++] = v.value;
   }
   return concrete;
@@ -136,5 +157,13 @@ Infinite.from = (fn, start) => Infinite.of(function* () {
     x = fn(x);
   }
 });
+
+// fromIterable :: Iterable a -> Infinite a
+Infinite.fromIterable = it => {
+  if (typeof it[Symbol.iterator] !== 'function') {
+    throw new Error(`Cannot create Infinite from non-iterable`);
+  }
+  return Infinite.of(() => it[Symbol.iterator]());
+};
 
 module.exports = Infinite;
