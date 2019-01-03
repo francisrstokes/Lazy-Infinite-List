@@ -51,6 +51,23 @@ naturalNumbers.take(5);
 // -> [ 0, 1, 2, 3, 4 ]
 ```
 
+### takeContinuous
+
+`takeContinuous :: Infinite a ~> Integer -> [[a], Infinite a]`
+
+`takeContinuous` is just like take, but it returns an array of two items: the *concrete list* and a new *Infinite* that produces elements where the previous one left off.
+
+**Example**
+```javascript
+let [concrete, nextPrimes] = primes.takeContinuous(5);
+console.log(concrete);
+// -> [ 2, 3, 5, 7, 11 ]
+
+[concrete, nextPrimes] = nextPrimes.takeContinuous(5);
+console.log(concrete);
+// -> [ 13, 17, 19, 23, 29 ]
+```
+
 ### nth
 
 `nth :: Infinite a ~> Integer -> a`

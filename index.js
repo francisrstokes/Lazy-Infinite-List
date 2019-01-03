@@ -144,8 +144,8 @@ Infinite.prototype.filterDependent = function (fn) {
   });
 };
 
-// take :: Infinite a ~> Integer -> [a]
-Infinite.prototype.take = function (n) {
+// takeContinuous :: Infinite a ~> Integer -> [[a], Infinite a]
+Infinite.prototype.takeContinuous = function (n) {
   const i = this.gen();
   const concrete = new Array(n);
   let index = 0;
@@ -154,7 +154,12 @@ Infinite.prototype.take = function (n) {
     if (v.done) return concrete.slice(0, index);
     concrete[index++] = v.value;
   }
-  return concrete;
+  return [concrete, Infinite.of(() => i)];
+};
+
+// take :: Infinite a ~> Integer -> [a]
+Infinite.prototype.take = function (n) {
+  return this.takeContinuous(n)[0];
 };
 
 // nth :: Infinite a ~> Integer -> a
