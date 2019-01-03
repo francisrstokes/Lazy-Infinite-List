@@ -230,7 +230,7 @@ const odds = Infinite.of(function*() {
 const odds = Infinite.from(x => x + 2, 1);
 ```
 
-# Infinite.fromIterable
+### Infinite.fromIterable
 
 `Infinite.fromIterable :: Iterable a -> Infinite a`
 
