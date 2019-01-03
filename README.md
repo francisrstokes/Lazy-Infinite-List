@@ -77,7 +77,7 @@ console.log(concrete);
 **Example**
 ```javascript
 primes.nth(5);
-// -> 4
+// -> 11
 ```
 
 ### drop
