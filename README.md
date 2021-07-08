@@ -15,7 +15,7 @@ npm i lazy-infinite
 const Infinite = require('lazy-infinite');
 
 // Create a representation of an infinite structure
-const naturalNumbers = Infinite.of(function*() {
+const naturalNumbers = Infinite.generator(function*() {
   let x = 0;
   while (true) yield x++;
 });
@@ -194,7 +194,7 @@ This can be used to create custom *indexing*.
 
 **Example**
 ```javascript
-const fibonacci = Infinite.of(function* () {
+const fibonacci = Infinite.generator(function* () {
   let a = 0;
   let b = 1;
   while (true) {
@@ -219,7 +219,7 @@ primes
 
 **Example**
 ```javascript
-const fibonacci = Infinite.of(function* () {
+const fibonacci = Infinite.generator(function* () {
   let a = 0;
   let b = 1;
   while (true) {
@@ -236,21 +236,59 @@ primes
 // -> [ 2, 1, 3, 1, 5 ]
 ```
 
-### Infinite.of
+### toGenerator
 
-`Infinite.of :: Generator a -> Infinite a`
+`toGenerator :: Infinite a ~> () -> Generator a`
 
-`Infinite.of` takes a potentially infinite generator function and returns an `Infinite` list.
+`toGenerator` returns a generator function that represents this `Infinite`s computation.
 
 **Example**
 ```javascript
-const odds = Infinite.of(function*() {
+const primeGeneratorFn = primes.toGenerator();
+
+const primeGen = primeGeneratorFn();
+primeGen.next();
+// -> { value: 2, done: false }
+primeGen.next();
+// -> { value: 3, done: false }
+primeGen.next();
+// -> { value: 5, done: false }
+```
+
+### Infinite.generator
+
+`Infinite.generator :: Generator a -> Infinite a`
+
+`Infinite.generator` takes a potentially infinite generator function and returns an `Infinite` list.
+
+**Example**
+```javascript
+const odds = Infinite.generator(function*() {
   let x = 1;
   while (true) {
     yield x;
     x += 2;
   }
 });
+```
+
+### Infinite.toGenerator
+
+`Infinite.toGenerator :: Infinite a -> Generator a`
+
+`Infinite.toGenerator` takes an `Infinite` list and returns a generator function that represents it's computation.
+
+**Example**
+```javascript
+const primeGeneratorFn = Infinite.toGenerator(primes);
+
+const primeGen = primeGeneratorFn();
+primeGen.next();
+// -> { value: 2, done: false }
+primeGen.next();
+// -> { value: 3, done: false }
+primeGen.next();
+// -> { value: 5, done: false }
 ```
 
 ### Infinite.from
@@ -278,4 +316,6 @@ Infinite.fromIterable([1,2,3,4,5,6,7]).take(5)
 
 ## Fantasy Land
 
-Supports: `Functor` and `Filterable`.
+Supports\*: `Functor` and `Filterable`.
+
+*\*Since a truly valid `of` static method cannot be written for `Infinite` it does not properly conform to either interface*
