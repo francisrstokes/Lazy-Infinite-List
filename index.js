@@ -16,7 +16,7 @@ Infinite.prototype.drop = function (n) {
   }
 
   const that = this;
-  return Infinite.of(function* () {
+  return Infinite.generator(function* () {
     const i = that.gen();
     let dropped = 0;
     while (dropped++ < n) i.next();
@@ -36,7 +36,7 @@ Infinite.prototype.intersperse = function (inf) {
   }
 
   const that = this;
-  return Infinite.of(function* () {
+  return Infinite.generator(function* () {
     const i = that.gen();
     const i2 = inf.gen();
     let useFirst = true;
@@ -57,7 +57,7 @@ Infinite.prototype.zip = function (inf) {
   }
 
   const that = this;
-  return Infinite.of(function* () {
+  return Infinite.generator(function* () {
     const i1 = that.gen();
     const i2 = inf.gen();
     while (true) {
@@ -72,7 +72,7 @@ Infinite.prototype.zip = function (inf) {
 // map :: Infinite a ~> (a -> b) -> Infinite b
 Infinite.prototype['fantasy-land/map'] = Infinite.prototype.map = function (fn) {
   const that = this;
-  return Infinite.of(function* () {
+  return Infinite.generator(function* () {
     const i = that.gen();
     while (true) {
       const v = i.next();
@@ -85,7 +85,7 @@ Infinite.prototype['fantasy-land/map'] = Infinite.prototype.map = function (fn) 
 // flatMap :: Infinite a ~> (a -> [b]) -> Infinite b
 Infinite.prototype.flatMap = function (fn) {
   const that = this;
-  return Infinite.of(function* () {
+  return Infinite.generator(function* () {
     const i = that.gen();
     while (true) {
       const v = i.next();
@@ -107,7 +107,7 @@ Infinite.prototype.mapIndexed = function (fn) {
 // filter :: Infinite a ~> (a -> Bool) -> Infinite b
 Infinite.prototype['fantasy-land/filter'] = Infinite.prototype.filter = function (fn) {
   const that = this;
-  return Infinite.of(function* () {
+  return Infinite.generator(function* () {
     const i = that.gen();
     while (true) {
       const v = i.next();
@@ -129,7 +129,7 @@ Infinite.prototype.filterIndexed = function (fn) {
 // filterDependent :: Infinite a ~> (a -> [a] -> Bool) -> Infinite b
 Infinite.prototype.filterDependent = function (fn) {
   const that = this;
-  return Infinite.of(function* () {
+  return Infinite.generator(function* () {
     const i = that.gen();
     const prev = [];
 
@@ -154,7 +154,7 @@ Infinite.prototype.takeContinuous = function (n) {
     if (v.done) return concrete.slice(0, index);
     concrete[index++] = v.value;
   }
-  return [concrete, Infinite.of(() => i)];
+  return [concrete, Infinite.generator(() => i)];
 };
 
 // take :: Infinite a ~> Integer -> [a]
@@ -167,11 +167,19 @@ Infinite.prototype.nth = function (n) {
   return this.take(n)[n-1];
 };
 
-// of :: Generator a -> Infinite a
-Infinite['fantasy-land/of'] = Infinite.of = gen => new Infinite(gen);
+// toGenerator :: Infinite a ~> () -> Generator a
+Infinite.prototype.toGenerator = function () {
+  return this.gen;
+};
+
+// generator :: Generator a -> Infinite a
+Infinite.generator = gen => new Infinite(gen);
+
+// toGenerator :: Infinite a -> Generator a
+Infinite.toGenerator = inf => inf.gen;
 
 // from :: (a -> a) -> a -> Infinite a
-Infinite.from = (fn, start) => Infinite.of(function* () {
+Infinite.from = (fn, start) => Infinite.generator(function* () {
   let x = start;
   while (true) {
     yield x;
@@ -184,7 +192,7 @@ Infinite.fromIterable = it => {
   if (typeof it[Symbol.iterator] !== 'function') {
     throw new Error(`Cannot create Infinite from non-iterable`);
   }
-  return Infinite.of(() => it[Symbol.iterator]());
+  return Infinite.generator(() => it[Symbol.iterator]());
 };
 
 module.exports = Infinite;
